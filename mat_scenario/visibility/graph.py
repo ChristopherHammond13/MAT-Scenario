@@ -2,7 +2,8 @@ import pyvisgraph as vg
 from multiprocessing import cpu_count
 from os.path import exists as path_exists
 
-class Map:
+
+class VisGraph:
 
     def __init__(self, index, points, obstacles):
         self.index = index
@@ -13,5 +14,9 @@ class Map:
             for p in o:
                 ob.append(vg.Point(p[0], p[1]))
             obstacle_points.append(ob)
-        g = vg.VisGraph()
-        g.build(obstacle_points, workers=cpu_count())
+        _g = vg.VisGraph()
+        _g.build(obstacle_points, workers=cpu_count())
+        self._g = _g
+
+    def get_shortest_path(self, start, destination):
+        return self._g.shortest_path(start, destination)
