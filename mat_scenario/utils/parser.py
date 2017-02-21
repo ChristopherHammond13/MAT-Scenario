@@ -58,10 +58,10 @@ class input_parser(parser):
             self.index = int(input.split(":")[0])
             rest = input.split(":")[1]
             robot_str = rest.split("#")[0]
-            poly_str = rest.split("#")[1]
-
             self.parse_robots(robot_str)
-            self.parse_polygons(poly_str)
+            if len(rest.split("#"))>1:
+                poly_str = rest.split("#")[1]
+                self.parse_polygons(poly_str)
 
             self._valid = True
         except Exception:
