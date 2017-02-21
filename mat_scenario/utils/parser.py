@@ -74,6 +74,46 @@ class input_parser(parser):
         output = {
             'index': self.index,
             'robots': self.coords_to_dicts(self.robots),
-            'polygons': self.coords_to_dicts(self.polygons)
+            'polygons': list(map(lambda x : self.coords_to_dicts(x), self.polygons))
+        }
+        return json.dumps(output, ensure_ascii=False)
+
+class output_parser(parser):
+
+    def __init__(self):
+        self.paths = []
+        super().__init__()
+
+    def parse_paths(self, path_str):
+        paths = path_str.split(";")
+        for path_str in paths:
+            path_str = path_str.replace("),(", ");(")
+            coords = path_str.split(";")
+            path = []
+            for coord in coords:
+                coord = coord.replace("(","")
+                coord = coord.replace(")", "")
+                path.append((float(coord.split(",")[0]), float(coord.split(",")[1])))
+            self.paths.append(path)
+
+    def parse(self, input):
+        self.paths = []
+        self.index = 0
+        self._valid = None
+        try:
+            input = input.replace(" ","")
+            self.index = int(input.split(":")[0])
+            path_str = input.split(":")[1]
+            self.parse_paths(path_str)
+            self._valid = True
+        except Exception:
+            self._valid = False
+
+    def to_json(self):
+        if not self._valid:
+            raise Exception("Input is not valid!")
+        output = {
+            'index': self.index,
+            'paths': list(map(lambda x : self.coords_to_dicts(x), self.paths))
         }
         return json.dumps(output, ensure_ascii=False)

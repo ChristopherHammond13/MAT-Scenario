@@ -92,11 +92,9 @@ def solve(problemset_file, algorithm, number):
 
     print(parsed_string)
 
-    """
     # for debugging
     for i in range(1, 5):
         print(str(problemset[i]))
-    """
 
     for i in range(1, number):
         # reset these trackers
