@@ -1,0 +1,76 @@
+<script>
+var data = {{{data}}};
+
+var canvas;
+var mapWidth = 100;
+var mapHeight = 100;
+
+var realWidth = window.width;
+var realHeight = window.height;
+
+function setup() {
+    canvas = createCanvas(windowWidth, windowHeight);
+    getScale();
+    calcAspect();
+}
+
+function calcAspect() {
+    var scaleWidth = windowWidth / mapWidth;
+    var scaleHeight = windowHeight / mapHeight;
+
+    if (scaleWidth < scaleHeight) {
+        realWidth = mapWidth * scaleWidth;
+        realHeight = windowHeight;
+    }
+    else {
+        realHeight = mapHeight * scaleHeight;
+        realWidth = windowWidth;
+    }
+}
+
+function getScale() {
+    // range
+    var range = {
+        x: {
+            min: 1000,
+            max: -1000
+        },
+        y: {
+            min: 1000,
+            max: -1000
+        }
+    };
+
+    coords = [].concat.apply([], data.output.paths);
+    coords.reduce((acc, path) => {
+        // x min
+        if (path.x < acc.x.min) acc.x.min = path.x;
+        if (path.x > acc.x.max) acc.x.max = path.x;
+        if (path.y < acc.y.min) acc.y.min = path.y;
+        if (path.y > acc.y.max) acc.y.max = path.y;
+        return acc;
+    }, range);
+
+    mapWidth = range.x.max - range.x.min;
+    mapHeight = range.y.max - range.y.min;
+}
+
+function windowResized() {
+    resizeCanvas(windowWidth, windowHeight);
+    calcAspect();
+}
+
+function setupScaling() {
+    return;
+    var sf = (realWidth < realHeight)? windowWidth / mapWidth : windowHeight / mapHeight;
+    scale(sf,sf);
+    translate(mapWidth, mapHeight);
+}
+
+function draw() {
+    for (var robot of data.input.robots) {
+        setupScaling();
+        ellipse(robot.x, robot.y, 0.02);
+    }
+}
+</script>

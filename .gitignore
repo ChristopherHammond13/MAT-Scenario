@@ -90,3 +90,5 @@ ENV/
 
 # IntelliJ files
 .idea/
+
+vis/node_modules/
