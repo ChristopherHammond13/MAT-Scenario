@@ -30,31 +30,44 @@ def main(argv):
         elif opt in ("-o", "--ofile"):
             output_file = arg
 
-    if (os.path.isfile(input_file) == False):
+    if not os.path.isfile(input_file):
         print("Input file does not exist")
         sys.exit(1)
 
-    if (output_file == ""):
+    if output_file == "":
         output_file = "output.mat"
 
-    if (os.path.isfile(output_file) == True):
+    if os.path.isfile(output_file):
         print("Specified output file already exists")
         sys.exit(1)
 
     try:
-        problem = open(input_file)
+        problemset_file = open(input_file)
         print("Opened " + input_file)
     except IOError:
         print("Unable to open input file")
         sys.exit(1)
 
-    solve(problem)
+    solve(problemset_file)
 
 
-def solve(problem):
-    '''
+def solve(problemset_file):
+    """
     Solves a problem given to it
-    '''
+    """
+    _parser = parser.input_parser()
+    _parsed_string = "Problems parsed: "
+    """
+    Our problems are stored in a map<int, (robots:[point],polygons:[[point]])>
+    """
+    _problemset = {}
+
+    for problem in problemset_file:
+        _parser.parse(problem)
+        _parsed_string += str(_parser.index) + ";"
+        _problemset[_parser.index] = (_parser.robots, _parser.polygons)
+
+    print(_parsed_string)
 
 
 if __name__ == '__main__':
