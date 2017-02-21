@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from visibility import graph as vis_graph
+from visibility import graph
 from utils import parser
 from collections import deque
 import sys
@@ -92,9 +92,11 @@ def solve(problemset_file, algorithm, number):
 
     print(parsed_string)
 
+    """
     # for debugging
     for i in range(1, 5):
         print(str(problemset[i]))
+    """
 
     for i in range(1, number):
         # reset these trackers
@@ -111,7 +113,10 @@ def solve(problemset_file, algorithm, number):
         schedule = algorithm(problem)
         awake.append(schedule.popleft())
         # get the visibility graph
-        _vis_graph = vis_graph(i, robots, obstacles)
+        try:
+            _vis_graph = graph.vis_graph(i, robots, obstacles)
+        except ValueError:
+            _vis_graph = None
 
         # perform simulation
         simulationRunning = True
@@ -138,7 +143,13 @@ def solve(problemset_file, algorithm, number):
                         try:
                             next_target = schedule.popleft()
                             claimed[robot] = next_target
-                            shortest_path = _vis_graph.get_shortest_path(robot, next_target)
+                            if _vis_graph is not None:
+                                shortest_path = _vis_graph.get_shortest_path(
+                                    robot, next_target)
+                            else:
+                                shortest_path = [(robot[0], robot[1]),
+                                                 (claimed[robot][0],
+                                                  claimed[robot][1])]
                             # need to put robot in distance_to_travel with its
                             # distance
 
