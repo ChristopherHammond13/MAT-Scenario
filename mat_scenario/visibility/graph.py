@@ -3,7 +3,7 @@ from multiprocessing import cpu_count
 from os.path import exists as path_exists
 
 
-class VisGraph:
+class vis_graph:
 
     def __init__(self, index, points, obstacles):
         self.index = index
