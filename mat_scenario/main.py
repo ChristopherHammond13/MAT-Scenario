@@ -1,10 +1,16 @@
 #!/usr/bin/python
 
-from visibility import graph
+from visibility import graph as vis_graph
 from utils import parser
+from collections import deque
 import sys
 import getopt
 import os.path
+
+
+awake = []
+claimed = {}
+distance_to_travel = {}
 
 
 def main(argv):
@@ -13,18 +19,35 @@ def main(argv):
     '''
     input_file = ""
     output_file = ""
-    help_string = "Usage: main.py -i <input_file> -o <output_file>"
+    help_string = "Usage: main.py -n <number_to-run> -a <algorithm> -i <input_file> -o \
+            <output_file>"
 
     try:
-        opts, _ = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
+        opts, _ = getopt.getopt(argv, "hn:a:i:o:", ["number=", "algorithm=",
+                                                    "ifile=", "ofile="])
     except getopt.GetoptError:
         print(help_string)
         sys.exit(2)
+
+    algorithm = default_schedule
+    number = 30
 
     for opt, arg in opts:
         if opt == "-h":
             print(help_string)
             sys.exit()
+        elif opt in ("-n", "--number"):
+            number = arg
+        elif opt in ("-a", "--algorithm"):
+            if arg == "greedy-claim":
+                algorithm = greedy_claim_schedule
+            elif arg == "greedy-dynamic":
+                algorithm = greedy_dynamic_schedule
+            else:
+                print("Algorithm: " + str(arg) + " does not exist, use \
+                      greedy-claim, greedy-dynamic or omit the option \
+                      for the default")
+                sys.exit(1)
         elif opt in ("-i", "--ifile"):
             input_file = arg
         elif opt in ("-o", "--ofile"):
@@ -48,26 +71,144 @@ def main(argv):
         print("Unable to open input file")
         sys.exit(1)
 
-    solve(problemset_file)
+    solve(problemset_file, algorithm, number)
 
 
-def solve(problemset_file):
+def solve(problemset_file, algorithm, number):
     """
     Solves a problem given to it
     """
     _parser = parser.input_parser()
-    _parsed_string = "Problems parsed: "
+    parsed_string = "Problems parsed: "
     """
     Our problems are stored in a map<int, (robots:[point],polygons:[[point]])>
     """
-    _problemset = {}
+    problemset = {}
 
     for problem in problemset_file:
         _parser.parse(problem)
-        _parsed_string += str(_parser.index) + ";"
-        _problemset[_parser.index] = (_parser.robots, _parser.polygons)
+        parsed_string += str(_parser.index) + ";"
+        problemset[_parser.index] = (_parser.robots, _parser.polygons)
 
-    print(_parsed_string)
+    print(parsed_string)
+
+    """
+    # for debugging
+    for i in range(1, 5):
+        print(str(problemset[i]))
+    """
+
+    for i in range(1, number):
+        # reset these trackers
+        awake = []
+        claimed = {}
+        distance_to_travel = {}
+        # a solution is our list of paths
+        solution = []
+        problem = problemset[i]
+        robots = problem[0]
+        obstacles = problem[1]
+
+        # get the wakeup order for the problem
+        schedule = algorithm(problem)
+        awake.append(schedule.popleft())
+        # get the visibility graph
+        _vis_graph = vis_graph(i, robots, obstacles)
+
+        # perform simulation
+        simulationRunning = True
+        while simulationRunning:
+            simulationRunning = False
+            for robot in robots:
+                if robot not in awake:
+                    simulationRunning = True
+                    break
+
+            # update positions
+            remaining_movement = 1.0
+            while (remaining_movement > 0):
+                # find distance to closest target
+                next_robot = None
+                min_distance = 9999
+
+                for robot in robots:
+                    if ((robot in awake) and (robot not in claimed)
+                       and (len(schedule) == 0)):
+                        print("Robot stopped")
+                    if ((robot in awake) and (robot not in claimed)
+                       and (len(schedule) > 0)):
+                        try:
+                            next_target = schedule.popleft()
+                            claimed[robot] = next_target
+                            shortest_path = _vis_graph.get_shortest_path(robot, next_target)
+                            # need to put robot in distance_to_travel with its
+                            # distance
+
+                        except IndexError:
+                            print("Robot stopped")
+                    if robot in awake:
+                        if distance_to_travel[robot] < min_distance:
+                            min_distance = distance_to_travel[robot]
+                            next_robot = robot
+
+                # if no robot close enough to awaken
+                if min_distance > remaining_movement:
+                    move_bots(remaining_movement)
+                    remaining_movement = 0
+
+                # if a robot close enough to awaken
+                if min_distance <= remaining_movement:
+                    move_bots(min_distance)
+                    remaining_movement -= min_distance
+
+                    # set target
+                    wakeup_target = claimed[next_robot]
+                    # wake target
+                    awake.append(wakeup_target)
+                    # free up the waker
+                    del claimed[next_robot]
+
+                    # here we need to do something about forming the path
+
+
+def move_bots(distance):
+    """
+    Moves the robots
+    """
+    for robot in awake:
+        # Move robot x
+        robot[0] += ((claimed[robot][0] - robot[0]) * distance /
+                     distance_to_travel[robot])
+        # Move robot y
+        robot[1] += ((claimed[robot][1] - robot[1]) * distance /
+                     distance_to_travel[robot])
+        # Update distance left to travel
+        distance_to_travel[robot] -= distance
+
+
+def default_schedule(problem):
+    """
+    Default schedule algorithm
+    """
+    _schedule = deque()
+    print(str(problem))
+    for robot in problem[0]:
+        print("Adding " + str(robot))
+        _schedule.append(robot)
+
+    return _schedule
+
+
+def greedy_claim_schedule(problem):
+    """
+    Greedy claim schedule algorithm
+    """
+
+
+def greedy_dynamic_schedule(problem):
+    """
+    Greedy dynamic schedule algorithm
+    """
 
 
 if __name__ == '__main__':
