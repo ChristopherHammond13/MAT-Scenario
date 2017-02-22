@@ -201,18 +201,33 @@ def solve(problemset_file, algorithm, number):
 
                     # add the point of the woken up robot to the path for
                     # the wakeup_target
-                    print(claimed[next_robot_id])
+                    # print(claimed[next_robot_id])
                     robot_paths[next_robot_id].append(claimed[next_robot_id])
-                    print("Path for " + str(next_robot_id) + ": " + str(robot_paths[next_robot_id]))
+                    # print("Path for " + str(next_robot_id) + ": " + str(robot_paths[next_robot_id]))
                     # free up the waker
                     del claimed[next_robot_id]
 
-        for path in robot_paths.keys():
-            if len(robot_paths[path]) > 1:
-                solution.append(robot_paths[path])
+        for visited in robot_paths.keys():
+            if len(robot_paths[visited]) > 1:
+                full_path = []
+                if _vis_graph is not None:
+                    for j in range(0, len(robot_paths[visited])-1):
+                        point1 = vg.Point(robot_paths[visited][j][0],
+                                          robot_paths[visited][j][1])
+                        point2 = vg.Point(robot_paths[visited][j+1][0],
+                                          robot_paths[visited][j+1][1])
+                        path_to_add = _vis_graph.get_shortest_path(
+                                        point1,
+                                        point2)
+                        for point in path_to_add:
+                            full_path.append((point.x, point.y))
+                else:
+                    full_path = robot_paths[visited]
 
-        print("\n\n Problem " + str(i) + " done!\n\n")
-        print("Solution is: " + str(solution))
+                solution.append(full_path)
+
+        print("\n Problem " + str(i) + " done!")
+        print("Solution is: " + str(solution) + "\n")
 
 
 def move_bots(distance):
@@ -243,7 +258,7 @@ def default_schedule(problem):
     _schedule = deque()
     # print(str(problem))
     for robot in problem[0]:
-        print("Adding " + str(robot))
+        # print("Adding " + str(robot))
         _schedule.append(robot)
 
     return _schedule
