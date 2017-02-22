@@ -21,9 +21,6 @@ class vis_graph:
     def get_shortest_path(self, start, destination):
         return self._g.shortest_path(start, destination)
 
-    def __lt__(self, point):
-        return self.x + self.y < point.x + point.y
-
     def get_shortest_path_length(self, start, destination):
         shortest_path = self.get_shortest_path(start, destination)
 
