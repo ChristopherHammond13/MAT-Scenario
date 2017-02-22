@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from visibility import graph
+import pyvisgraph as vg
 from utils import parser
 from collections import deque
 import sys
@@ -97,11 +98,13 @@ def solve(problemset_file, algorithm, number):
     for i in range(1, number):
         # reset these trackers
         global awake
-        awake = []
+        awake = {}
         global claimed
         claimed = {}
         global distance_to_travel
         distance_to_travel = {}
+        global stopped
+        stopped = set([])
         # a solution is our list of paths
         solution = []
         problem = problemset[i]
@@ -110,7 +113,8 @@ def solve(problemset_file, algorithm, number):
 
         # get the wakeup order for the problem
         schedule = algorithm(problem)
-        awake.append(schedule.popleft())
+        first_robot = schedule.popleft()
+        awake[robots.index(first_robot)] = first_robot
         # get the visibility graph
         try:
             _vis_graph = graph.vis_graph(i, robots, obstacles)
@@ -122,49 +126,55 @@ def solve(problemset_file, algorithm, number):
         while simulationRunning:
             simulationRunning = False
             for robot in robots:
-                if robot not in awake:
+                if robots.index(robot) not in awake.keys():
                     simulationRunning = True
                     break
 
             # update positions
             remaining_movement = 10.0
             while (remaining_movement > 0):
-                if remaining_movement != 10.0:
-                    print(remaining_movement)
                 # find distance to closest target
-                next_robot = None
+                next_robot_id = None
                 min_distance = 9999
 
                 for robot in robots:
-                    if ((robot in awake) and (robot not in claimed)
+                    robot_id = robots.index(robot)
+                    if ((robot_id in awake.keys())
+                        and (robot_id not in claimed.keys())
+                        and (robot_id not in stopped)
                        and (len(schedule) == 0)):
-                        print("Robot stopped")
-                    if ((robot in awake) and (robot not in claimed)
+                        stopped.add(robot_id)
+                        print("[ScheduleEmpty] Robots stopped: " + str(stopped))
+                    if ((robot_id in awake.keys())
+                        and (robot_id not in claimed.keys())
+                        and (robot_id not in stopped)
                        and (len(schedule) > 0)):
                         try:
                             next_target = schedule.popleft()
-                            claimed[robot] = next_target
+                            claimed[robot_id] = next_target
                             if _vis_graph is not None:
                                 min_len = _vis_graph.get_shortest_path_length(
-                                    robot, next_target)
+                                    vg.Point(awake[robot_id][0], awake[robot_id][1]),
+                                    vg.Point(next_target[0], next_target[1]))
                             else:
                                 min_len = math.sqrt(
-                                    math.pow(robot[0]
-                                             - claimed[robot][0], 2) +
-                                    math.pow(robot[1]
-                                             - claimed[robot][1], 2))
+                                    math.pow(awake[robot_id][0]
+                                             - claimed[robot_id][0], 2) +
+                                    math.pow(awake[robot_id][1]
+                                             - claimed[robot_id][1], 2))
 
                             # need to put robot in distance_to_travel with its
                             # distance
                             print("Distance between " + str(robot) + " and " + str(next_target) + " is " + str(min_len))
-                            distance_to_travel[robot] = min_len
+                            distance_to_travel[robot_id] = min_len
 
                         except IndexError:
-                            print("Robot stopped")
-                    if robot in awake:
-                        if distance_to_travel[robot] < min_distance:
-                            min_distance = distance_to_travel[robot]
-                            next_robot = robot
+                            stopped.add(robot_id)
+                            print("[IndexError] Robots stopped: " + str(stopped))
+                    if (robot_id in awake.keys()) and (robot_id not in stopped):
+                        if distance_to_travel[robot_id] < min_distance:
+                            min_distance = distance_to_travel[robot_id]
+                            next_robot_id = robot_id
 
                 # if no robot close enough to awaken
                 if min_distance > remaining_movement:
@@ -177,32 +187,40 @@ def solve(problemset_file, algorithm, number):
                     remaining_movement -= min_distance
 
                     # set target
-                    wakeup_target = claimed[next_robot]
+                    wakeup_target = claimed[next_robot_id]
+                    wakeup_id = robots.index(wakeup_target)
                     # wake target
-                    awake.append(wakeup_target)
+                    awake[wakeup_id] = wakeup_target
+                    print("Woke up " + str(wakeup_id) + " with "
+                          + str(robot_id))
+
                     # free up the waker
-                    del claimed[next_robot]
+                    del claimed[next_robot_id]
 
                     # here we need to do something about forming the path
+
+        print("Problem " + str(i) + " done")
 
 
 def move_bots(distance):
     """
     Moves the robots
     """
-    print("Move bots")
-    for robot in awake:
-        print(robot)
-        # Move robot to target along x axis
-        new_x = robot[0] + ((claimed[robot][0] - robot[0]) * distance /
-                            distance_to_travel[robot])
-        # Move robot to target along y axis
-        new_y = robot[1] + ((claimed[robot][1] - robot[1]) * distance /
-                            distance_to_travel[robot])
-        robot = (new_x, new_y)
-        print("New robot position: " + str(robot))
-        # Update distance left to travel
-        distance_to_travel[robot] -= distance
+    # print("Move bots")
+    for robot_id in awake.keys():
+        if robot_id not in stopped:
+            # Move robot to target along x axis
+            new_x = awake[robot_id][0] + ((claimed[robot_id][0] -
+                                          awake[robot_id][0]) * distance /
+                                          distance_to_travel[robot_id])
+            # Move robot to target along y axis
+            new_y = awake[robot_id][1] + ((claimed[robot_id][1] -
+                                          awake[robot_id][1]) * distance /
+                                          distance_to_travel[robot_id])
+            awake[robot_id] = (new_x, new_y)
+            # print("New robot " + str(robot_id) + " position: " + str(awake[robot_id]))
+            # Update distance left to travel
+            distance_to_travel[robot_id] -= distance
 
 
 def default_schedule(problem):
@@ -210,7 +228,7 @@ def default_schedule(problem):
     Default schedule algorithm
     """
     _schedule = deque()
-    print(str(problem))
+    # print(str(problem))
     for robot in problem[0]:
         print("Adding " + str(robot))
         _schedule.append(robot)

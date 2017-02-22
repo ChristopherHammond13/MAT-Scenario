@@ -31,7 +31,7 @@ class vis_graph:
 
         for i in range(0, len(shortest_path) - 1):
             path_length += math.sqrt(
-                math.pow(shortest_path[i+1][0]-shortest_path[i][0], 2) +
-                math.pow(shortest_path[i+1][1] - shortest_path[i][1], 2))
+                math.pow(shortest_path[i+1].x-shortest_path[i].x, 2) +
+                math.pow(shortest_path[i+1].y - shortest_path[i].y, 2))
 
         return path_length
