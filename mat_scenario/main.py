@@ -141,11 +141,13 @@ def solve(problemset_file, algorithm, number):
                     robot_id = robots.index(robot)
                     if ((robot_id in awake.keys())
                         and (robot_id not in claimed.keys())
+                        and (robot_id not in stopped)
                        and (len(schedule) == 0)):
                         stopped.add(robot_id)
-                        print("Robots stopped: " + str(stopped))
+                        print("[ScheduleEmpty] Robots stopped: " + str(stopped))
                     if ((robot_id in awake.keys())
                         and (robot_id not in claimed.keys())
+                        and (robot_id not in stopped)
                        and (len(schedule) > 0)):
                         try:
                             next_target = schedule.popleft()
@@ -168,7 +170,7 @@ def solve(problemset_file, algorithm, number):
 
                         except IndexError:
                             stopped.add(robot_id)
-                            print("Robot stopped: " + str(stopped))
+                            print("[IndexError] Robots stopped: " + str(stopped))
                     if (robot_id in awake.keys()) and (robot_id not in stopped):
                         if distance_to_travel[robot_id] < min_distance:
                             min_distance = distance_to_travel[robot_id]
@@ -189,21 +191,22 @@ def solve(problemset_file, algorithm, number):
                     wakeup_id = robots.index(wakeup_target)
                     # wake target
                     awake[wakeup_id] = wakeup_target
-                    print("Woke up " + str(wakeup_id))
+                    print("Woke up " + str(wakeup_id) + " with "
+                          + str(robot_id))
 
                     # free up the waker
                     del claimed[next_robot_id]
 
                     # here we need to do something about forming the path
 
-        print("Problem " + str(i) + "done")
+        print("Problem " + str(i) + " done")
 
 
 def move_bots(distance):
     """
     Moves the robots
     """
-    print("Move bots")
+    # print("Move bots")
     for robot_id in awake.keys():
         if robot_id not in stopped:
             # Move robot to target along x axis
@@ -215,7 +218,7 @@ def move_bots(distance):
                                           awake[robot_id][1]) * distance /
                                           distance_to_travel[robot_id])
             awake[robot_id] = (new_x, new_y)
-            print("New robot " + str(robot_id) + " position: " + str(awake[robot_id]))
+            # print("New robot " + str(robot_id) + " position: " + str(awake[robot_id]))
             # Update distance left to travel
             distance_to_travel[robot_id] -= distance
 
@@ -225,7 +228,7 @@ def default_schedule(problem):
     Default schedule algorithm
     """
     _schedule = deque()
-    print(str(problem))
+    # print(str(problem))
     for robot in problem[0]:
         print("Adding " + str(robot))
         _schedule.append(robot)
