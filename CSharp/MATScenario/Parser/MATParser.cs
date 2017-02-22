@@ -19,7 +19,7 @@ namespace MATScenario.Parser
     public class MatParser
     {
         private readonly string _inputData;
-        public ObservableCollection<MatScenario> Scenarios = new ObservableCollection<MatScenario>();
+        public List<MatScenario> Scenarios = new List<MatScenario>();
         
         public MatParser(string inputText)
         {
@@ -76,13 +76,6 @@ namespace MATScenario.Parser
 
                             corners.Add(new CoordinatePair(x, y));
                         }
-
-                        //var corners = (from coordPair in obstacle.Split(',')
-                        //    select coordPair.Split(',')
-                        //    into coords
-                        //    let x = double.Parse(coords[0].Substring(1, coords[0].Length - 1))
-                        //    let y = double.Parse(coords[1].Substring(1, coords[1].Length - 1))
-                        //    select new CoordinatePair(x, y)).ToList();
 
                         var obstaclePolygon = new Polygon
                         {
