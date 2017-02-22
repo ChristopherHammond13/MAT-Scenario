@@ -1,0 +1,81 @@
+﻿<Window x:Class="MATScenario.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MATScenario"
+        xmlns:utils="clr-namespace:MATScenario.Utils"
+        mc:Ignorable="d"
+        Title="Visibility Graph" Height="500" Width="1000"
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        x:Name="MainWindowElement">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="*"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="300"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0"
+                   Content="MAT Scenario"
+                   FontWeight="Bold"
+                   FontSize="20"></Label>
+            <ComboBox x:Name="ScenarioComboBox"
+                      Grid.Column="1"
+                      SelectionChanged="ScenarioComboBox_OnSelectionChanged"
+                      FontSize="20"></ComboBox>
+            <Slider Minimum="0.5"
+                    Maximum="40.0"
+                    Value="10.0"
+                    SmallChange="0.5"
+                    LargeChange="5.0"
+                    Grid.Column="2"
+                    VerticalAlignment="Center"
+                    x:Name="ScaleSlider"></Slider>
+            <Label x:Name="ZoomLabel"
+                   Width="150"
+                   Grid.Column="3"
+                   FontSize="18"
+                   VerticalContentAlignment="Center">
+                <TextBlock>
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="Scale: {0}x">
+                            <Binding ElementName="ScaleSlider" Path="Value" StringFormat=" {0:0.##}"></Binding>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </Label>
+        </Grid>
+
+        <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                          VerticalScrollBarVisibility="Auto"
+                          x:Name="CanvasScrollViewer"
+                          Grid.Row="1">
+            <Grid Width="Auto"
+                  Height="Auto">
+                <Border>
+                    <Canvas
+                        x:Name="GraphCanvas"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Width="Auto"
+                        Height="Auto"
+                        RenderTransformOrigin="0.5, 0.5">
+                        <Canvas.Resources>
+                            <utils:FlipConverter x:Key="FlipConverter"></utils:FlipConverter>
+                        </Canvas.Resources>
+                        <Canvas.LayoutTransform>
+                            <ScaleTransform ScaleY="{Binding ElementName=ScaleSlider, Path=Value, Converter={StaticResource FlipConverter}}"
+                                ScaleX="{Binding ElementName=ScaleSlider, Path=Value}"></ScaleTransform>
+                        </Canvas.LayoutTransform>
+                    </Canvas>
+                </Border>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</Window>
