@@ -88,7 +88,7 @@ def solve(problemset_file, algorithm, number):
         parsed_string += str(_parser.index) + ";"
         problemset[_parser.index] = (_parser.robots, _parser.polygons)
 
-    print(parsed_string)
+    print(parsed_string + "\nStarting...\n")
 
     """
     # for debugging
@@ -147,7 +147,7 @@ def solve(problemset_file, algorithm, number):
                         and (robot_id not in stopped)
                        and (len(schedule) == 0)):
                         stopped.add(robot_id)
-                        print("[ScheduleEmpty] Robots stopped: " + str(stopped))
+                        # print("[ScheduleEmpty] Robots stopped: " + str(stopped))
                     if ((robot_id in awake.keys())
                         and (robot_id not in claimed.keys())
                         and (robot_id not in stopped)
@@ -173,7 +173,7 @@ def solve(problemset_file, algorithm, number):
 
                         except IndexError:
                             stopped.add(robot_id)
-                            print("[IndexError] Robots stopped: " + str(stopped))
+                            # print("[IndexError] Robots stopped: " + str(stopped))
                     if (robot_id in awake.keys()) and (robot_id not in stopped):
                         if distance_to_travel[robot_id] < min_distance:
                             min_distance = distance_to_travel[robot_id]
@@ -196,8 +196,8 @@ def solve(problemset_file, algorithm, number):
                     awake[wakeup_id] = wakeup_target
                     # create path for woken up target
                     robot_paths[wakeup_id] = [wakeup_target]
-                    print("Woke up " + str(wakeup_id) + " with "
-                          + str(next_robot_id))
+                    # print("Woke up " + str(wakeup_id) + " with "
+                         # + str(next_robot_id))
 
                     # add the point of the woken up robot to the path for
                     # the wakeup_target
@@ -226,8 +226,11 @@ def solve(problemset_file, algorithm, number):
 
                 solution.append(full_path)
 
-        print("\n Problem " + str(i) + " done!")
-        print("Solution is: " + str(solution) + "\n")
+        solution_string_list = []
+        for path in solution:
+            solution_string_list.append(', '.join(repr(e) for e in path))
+
+        print(str(i) + ": " + str('; '.join(solution_string_list)))
 
 
 def move_bots(distance):
