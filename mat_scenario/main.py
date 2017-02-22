@@ -4,6 +4,7 @@ from visibility import graph
 import pyvisgraph as vg
 from utils import parser
 from collections import deque
+from collections import OrderedDict
 import sys
 import math
 import getopt
@@ -107,6 +108,7 @@ def solve(problemset_file, algorithm, number):
         stopped = set([])
         # a solution is our list of paths
         solution = []
+        robot_paths = OrderedDict()
         problem = problemset[i]
         robots = problem[0]
         obstacles = problem[1]
@@ -115,6 +117,7 @@ def solve(problemset_file, algorithm, number):
         schedule = algorithm(problem)
         first_robot = schedule.popleft()
         awake[robots.index(first_robot)] = first_robot
+        robot_paths[robots.index(first_robot)] = [first_robot]
         # get the visibility graph
         try:
             _vis_graph = graph.vis_graph(i, robots, obstacles)
@@ -165,7 +168,7 @@ def solve(problemset_file, algorithm, number):
 
                             # need to put robot in distance_to_travel with its
                             # distance
-                            print("Distance between " + str(robot) + " and " + str(next_target) + " is " + str(min_len))
+                            # print("Distance between " + str(robot) + " and " + str(next_target) + " is " + str(min_len))
                             distance_to_travel[robot_id] = min_len
 
                         except IndexError:
@@ -191,15 +194,25 @@ def solve(problemset_file, algorithm, number):
                     wakeup_id = robots.index(wakeup_target)
                     # wake target
                     awake[wakeup_id] = wakeup_target
+                    # create path for woken up target
+                    robot_paths[wakeup_id] = [wakeup_target]
                     print("Woke up " + str(wakeup_id) + " with "
-                          + str(robot_id))
+                          + str(next_robot_id))
 
+                    # add the point of the woken up robot to the path for
+                    # the wakeup_target
+                    print(claimed[next_robot_id])
+                    robot_paths[next_robot_id].append(claimed[next_robot_id])
+                    print("Path for " + str(next_robot_id) + ": " + str(robot_paths[next_robot_id]))
                     # free up the waker
                     del claimed[next_robot_id]
 
-                    # here we need to do something about forming the path
+        for path in robot_paths.keys():
+            if len(robot_paths[path]) > 1:
+                solution.append(robot_paths[path])
 
-        print("Problem " + str(i) + " done")
+        print("\n\n Problem " + str(i) + " done!\n\n")
+        print("Solution is: " + str(solution))
 
 
 def move_bots(distance):
