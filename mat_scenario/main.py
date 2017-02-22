@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from visibility import graph
+import pyvisgraph as vg
 from utils import parser
 from collections import deque
 import sys
@@ -151,7 +152,8 @@ def solve(problemset_file, algorithm, number):
                             claimed[robot_id] = next_target
                             if _vis_graph is not None:
                                 min_len = _vis_graph.get_shortest_path_length(
-                                    awake[robot_id], next_target)
+                                    vg.Point(awake[robot_id][0], awake[robot_id][1]),
+                                    vg.Point(next_target[0], next_target[1]))
                             else:
                                 min_len = math.sqrt(
                                     math.pow(awake[robot_id][0]
