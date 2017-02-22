@@ -1,6 +1,6 @@
 import pyvisgraph as vg
+import math
 from multiprocessing import cpu_count
-from os.path import exists as path_exists
 
 
 class vis_graph:
@@ -20,3 +20,15 @@ class vis_graph:
 
     def get_shortest_path(self, start, destination):
         return self._g.shortest_path(start, destination)
+
+    def get_shortest_path_length(self, start, destination):
+        shortest_path = self.get_shortest_path(start, destination)
+
+        path_length = 0.0
+
+        for i in range(0, len(shortest_path) - 1):
+            path_length += math.sqrt(
+                math.pow(shortest_path[i+1][0]-shortest_path[i][0], 2) +
+                math.pow(shortest_path[i+1][1] - shortest_path[i][1], 2))
+
+        return path_length

@@ -4,13 +4,9 @@ from visibility import graph
 from utils import parser
 from collections import deque
 import sys
+import math
 import getopt
 import os.path
-
-
-awake = []
-claimed = {}
-distance_to_travel = {}
 
 
 def main(argv):
@@ -37,7 +33,7 @@ def main(argv):
             print(help_string)
             sys.exit()
         elif opt in ("-n", "--number"):
-            number = arg
+            number = int(arg)
         elif opt in ("-a", "--algorithm"):
             if arg == "greedy-claim":
                 algorithm = greedy_claim_schedule
@@ -100,8 +96,11 @@ def solve(problemset_file, algorithm, number):
 
     for i in range(1, number):
         # reset these trackers
+        global awake
         awake = []
+        global claimed
         claimed = {}
+        global distance_to_travel
         distance_to_travel = {}
         # a solution is our list of paths
         solution = []
@@ -128,8 +127,10 @@ def solve(problemset_file, algorithm, number):
                     break
 
             # update positions
-            remaining_movement = 1.0
+            remaining_movement = 10.0
             while (remaining_movement > 0):
+                if remaining_movement != 10.0:
+                    print(remaining_movement)
                 # find distance to closest target
                 next_robot = None
                 min_distance = 9999
@@ -144,14 +145,19 @@ def solve(problemset_file, algorithm, number):
                             next_target = schedule.popleft()
                             claimed[robot] = next_target
                             if _vis_graph is not None:
-                                shortest_path = _vis_graph.get_shortest_path(
+                                min_len = _vis_graph.get_shortest_path_length(
                                     robot, next_target)
                             else:
-                                shortest_path = [(robot[0], robot[1]),
-                                                 (claimed[robot][0],
-                                                  claimed[robot][1])]
+                                min_len = math.sqrt(
+                                    math.pow(robot[0]
+                                             - claimed[robot][0], 2) +
+                                    math.pow(robot[1]
+                                             - claimed[robot][1], 2))
+
                             # need to put robot in distance_to_travel with its
                             # distance
+                            print("Distance between " + str(robot) + " and " + str(next_target) + " is " + str(min_len))
+                            distance_to_travel[robot] = min_len
 
                         except IndexError:
                             print("Robot stopped")
@@ -184,13 +190,17 @@ def move_bots(distance):
     """
     Moves the robots
     """
+    print("Move bots")
     for robot in awake:
-        # Move robot x
-        robot[0] += ((claimed[robot][0] - robot[0]) * distance /
-                     distance_to_travel[robot])
-        # Move robot y
-        robot[1] += ((claimed[robot][1] - robot[1]) * distance /
-                     distance_to_travel[robot])
+        print(robot)
+        # Move robot to target along x axis
+        new_x = robot[0] + ((claimed[robot][0] - robot[0]) * distance /
+                            distance_to_travel[robot])
+        # Move robot to target along y axis
+        new_y = robot[1] + ((claimed[robot][1] - robot[1]) * distance /
+                            distance_to_travel[robot])
+        robot = (new_x, new_y)
+        print("New robot position: " + str(robot))
         # Update distance left to travel
         distance_to_travel[robot] -= distance
 
