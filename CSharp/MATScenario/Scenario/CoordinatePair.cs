@@ -16,5 +16,11 @@ namespace MATScenario.Scenario
             X = x;
             Y = y;
         }
+
+        public CoordinatePair(CoordinatePair other)
+        {
+            X = other.X;
+            Y = other.Y;
+        }
     }
 }

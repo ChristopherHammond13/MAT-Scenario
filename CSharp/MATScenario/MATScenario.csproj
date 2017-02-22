@@ -55,12 +55,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Parser\MatSolutionParser.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="Scenario\CoordinatePair.cs" />
     <Compile Include="Scenario\MatScenario.cs" />
     <Compile Include="Scenario\Robot.cs" />
+    <Compile Include="Solution\MatSolution.cs" />
     <Compile Include="Utils\FlipConverter.cs" />
-    <Compile Include="VisibilityGraph\VisibilityGraph.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -101,6 +102,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="VisibilityGraph\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

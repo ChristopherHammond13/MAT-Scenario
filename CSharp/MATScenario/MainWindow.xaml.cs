@@ -26,13 +26,25 @@ namespace MATScenario
         public MatParser Parser { get; }
         public static double DefaultScale => 10.0;
         public double CurrentScale { get; private set; } = DefaultScale;
+        public MatSolutionParser SolutionParser { get; }
 
         public MainWindow()
         {
             InitializeComponent();
             Parser = MatParser.FromFilePath("robots.mat");
+            SolutionParser = MatSolutionParser.FromFilePath("solution.mat");
             foreach (var s in Parser.Scenarios)
+            {
+                if (SolutionParser.Solutions.ContainsKey(s.Index))
+                {
+                    for (var i = 0; i < SolutionParser.Solutions[s.Index].Movements.Count; i++)
+                    {
+                        SolutionParser.Solutions[s.Index].Movements[i].ForEach(x => s.Robots[i].Move(x.X, x.Y));
+                    }
+                }
                 ScenarioComboBox.Items.Add(s);
+            }
+                
             ScenarioComboBox.SelectedIndex = 0;
             RefreshCanvas((MatScenario)ScenarioComboBox.SelectedItem);
         }
@@ -58,8 +70,27 @@ namespace MATScenario
             foreach (var r in scenario.Robots)
             {
                 var e = GraphCanvas.Children.Add(r.EllipseRepresentation);
-                Canvas.SetLeft(GraphCanvas.Children[e], r.CurrentPosition.X);
-                Canvas.SetTop(GraphCanvas.Children[e], r.CurrentPosition.Y);
+                Canvas.SetLeft(GraphCanvas.Children[e], r.MovementHistory.First().X);
+                Canvas.SetTop(GraphCanvas.Children[e], r.MovementHistory.First().Y);
+                if (r.MovementHistory.Count > 1)
+                {
+                    for (var i = 1; i < r.MovementHistory.Count; i++)
+                    {
+                        GraphCanvas.Children.Add(new Polyline
+                        {
+                            Points = new PointCollection
+                            {
+                                new Point(r.MovementHistory[i].X, r.MovementHistory[i].Y),
+                                new Point(r.MovementHistory[i - 1].X, r.MovementHistory[i - 1].Y)
+                            },
+                            Stroke = Brushes.DarkBlue,
+                            Fill = Brushes.DarkBlue,
+                            StrokeThickness = 0.5,
+                            HorizontalAlignment = HorizontalAlignment.Center,
+                            VerticalAlignment = VerticalAlignment.Center
+                        });
+                    }
+                }
             }
         }
     }
