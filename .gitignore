@@ -90,3 +90,6 @@ ENV/
 
 # IntelliJ files
 .idea/
+
+# Heathens
+.DS_Store
