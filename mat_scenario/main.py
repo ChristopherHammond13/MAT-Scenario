@@ -134,7 +134,7 @@ def solve(problemset_file, algorithm, number):
                     break
 
             # update positions
-            remaining_movement = 10.0
+            remaining_movement = 0.5
             while (remaining_movement > 0):
                 # find distance to closest target
                 next_robot_id = None
@@ -228,9 +228,9 @@ def solve(problemset_file, algorithm, number):
 
         solution_string_list = []
         for path in solution:
-            solution_string_list.append(', '.join(repr(e) for e in path))
+            solution_string_list.append(','.join(repr(e) for e in path))
 
-        print(str(i) + ": " + str('; '.join(solution_string_list)))
+        print(str(i) + ": " + str(';'.join(solution_string_list)))
 
 
 def move_bots(distance):
