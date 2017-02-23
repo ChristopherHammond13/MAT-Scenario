@@ -78,6 +78,21 @@ class input_parser(parser):
         }
         return json.dumps(output, ensure_ascii=False)
 
+    # Prints out the contents of the .environmennt file.
+    def print_environment(self):
+        output = "// OUTER BOUNDARY\n-1000.0  -1000.0\n1000.0  -1000.0\n1000.0  1000.0\n-1000.0  1000.0\n"
+        for polygon in self.polygons:
+            output = output + "// Polygon x-y coords listed anticlockwise\n"
+            for coord in polygon:
+                output = output + "{0}  {1}\n".format(coord[0], coord[1])
+        return output
+
+    def print_guards(self):
+        output = "// Robots x-y\n"
+        for robot in self.robots:
+            output = output + "{0}  {1}\n".format(robot[0], robot[1])
+        return output
+
 class output_parser(parser):
 
     def __init__(self):
