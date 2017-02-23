@@ -228,9 +228,9 @@ def solve(problemset_file, algorithm, number):
 
         solution_string_list = []
         for path in solution:
-            solution_string_list.append(', '.join(repr(e) for e in path))
+            solution_string_list.append(','.join(repr(e) for e in path).replace(" ", ""))
 
-        print(str(i) + ": " + str('; '.join(solution_string_list)))
+        print(str(i) + ": " + str(';'.join(solution_string_list)))
 
 
 def move_bots(distance):
