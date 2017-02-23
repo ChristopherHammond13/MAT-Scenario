@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+from __future__ import division
+from __future__ import absolute_import
 from visibility import graph
 import pyvisgraph as vg
 from utils import parser
@@ -9,94 +11,95 @@ import sys
 import math
 import getopt
 import os.path
+from io import open
 
 
 def main(argv):
-    '''
+    u'''
     Parses command line args and calls appropriate function
     '''
-    input_file = ""
-    output_file = ""
-    help_string = "Usage: main.py -n <number_to-run> -a <algorithm> -i <input_file> -o \
+    input_file = u""
+    output_file = u""
+    help_string = u"Usage: main.py -n <number_to-run> -a <algorithm> -i <input_file> -o \
             <output_file>"
 
     try:
-        opts, _ = getopt.getopt(argv, "hn:a:i:o:", ["number=", "algorithm=",
-                                                    "ifile=", "ofile="])
+        opts, _ = getopt.getopt(argv, u"hn:a:i:o:", [u"number=", u"algorithm=",
+                                                    u"ifile=", u"ofile="])
     except getopt.GetoptError:
-        print(help_string)
+        print help_string
         sys.exit(2)
 
     algorithm = default_schedule
     number = 30
 
     for opt, arg in opts:
-        if opt == "-h":
-            print(help_string)
+        if opt == u"-h":
+            print help_string
             sys.exit()
-        elif opt in ("-n", "--number"):
+        elif opt in (u"-n", u"--number"):
             number = int(arg)
-        elif opt in ("-a", "--algorithm"):
-            if arg == "greedy-claim":
+        elif opt in (u"-a", u"--algorithm"):
+            if arg == u"greedy-claim":
                 algorithm = greedy_claim_schedule
-            elif arg == "greedy-dynamic":
+            elif arg == u"greedy-dynamic":
                 algorithm = greedy_dynamic_schedule
             else:
-                print("Algorithm: " + str(arg) + " does not exist, use \
+                print u"Algorithm: " + unicode(arg) + u" does not exist, use \
                       greedy-claim, greedy-dynamic or omit the option \
-                      for the default")
+                      for the default"
                 sys.exit(1)
-        elif opt in ("-i", "--ifile"):
+        elif opt in (u"-i", u"--ifile"):
             input_file = arg
-        elif opt in ("-o", "--ofile"):
+        elif opt in (u"-o", u"--ofile"):
             output_file = arg
 
     if not os.path.isfile(input_file):
-        print("Input file does not exist")
+        print u"Input file does not exist"
         sys.exit(1)
 
-    if output_file == "":
-        output_file = "output.mat"
+    if output_file == u"":
+        output_file = u"output.mat"
 
     if os.path.isfile(output_file):
-        print("Specified output file already exists")
+        print u"Specified output file already exists"
         sys.exit(1)
 
     try:
         problemset_file = open(input_file)
-        print("Opened " + input_file)
+        print u"Opened " + input_file
     except IOError:
-        print("Unable to open input file")
+        print u"Unable to open input file"
         sys.exit(1)
 
     solve(problemset_file, algorithm, number)
 
 
 def solve(problemset_file, algorithm, number):
-    """
+    u"""
     Solves a problem given to it
     """
     _parser = parser.input_parser()
-    parsed_string = "Problems parsed: "
-    """
+    parsed_string = u"Problems parsed: "
+    u"""
     Our problems are stored in a map<int, (robots:[point],polygons:[[point]])>
     """
     problemset = {}
 
     for problem in problemset_file:
         _parser.parse(problem)
-        parsed_string += str(_parser.index) + ";"
+        parsed_string += unicode(_parser.index) + u";"
         problemset[_parser.index] = (_parser.robots, _parser.polygons)
 
-    print(parsed_string + "\nStarting...\n")
+    print parsed_string + u"\nStarting...\n"
 
-    """
+    u"""
     # for debugging
     for i in range(1, 5):
         print(str(problemset[i]))
     """
 
-    for i in range(1, number):
+    for i in xrange(1, number+1):
         # reset these trackers
         global awake
         awake = {}
@@ -211,7 +214,7 @@ def solve(problemset_file, algorithm, number):
             if len(robot_paths[visited]) > 1:
                 full_path = []
                 if _vis_graph is not None:
-                    for j in range(0, len(robot_paths[visited])-1):
+                    for j in xrange(0, len(robot_paths[visited])-1):
                         point1 = vg.Point(robot_paths[visited][j][0],
                                           robot_paths[visited][j][1])
                         point2 = vg.Point(robot_paths[visited][j+1][0],
@@ -228,13 +231,13 @@ def solve(problemset_file, algorithm, number):
 
         solution_string_list = []
         for path in solution:
-            solution_string_list.append(','.join(repr(e) for e in path).replace(" ", ""))
+            solution_string_list.append(u','.join(repr(e) for e in path).replace(u" ", u""))
 
-        print(str(i) + ": " + str(';'.join(solution_string_list)))
+        print unicode(i) + u": " + unicode(u';'.join(solution_string_list))
 
 
 def move_bots(distance):
-    """
+    u"""
     Moves the robots
     """
     # print("Move bots")
@@ -255,7 +258,7 @@ def move_bots(distance):
 
 
 def default_schedule(problem):
-    """
+    u"""
     Default schedule algorithm
     """
     _schedule = deque()
@@ -268,16 +271,16 @@ def default_schedule(problem):
 
 
 def greedy_claim_schedule(problem):
-    """
+    u"""
     Greedy claim schedule algorithm
     """
 
 
 def greedy_dynamic_schedule(problem):
-    """
+    u"""
     Greedy dynamic schedule algorithm
     """
 
 
-if __name__ == '__main__':
+if __name__ == u'__main__':
     main(sys.argv[1:])
