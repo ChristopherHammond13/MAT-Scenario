@@ -16,9 +16,12 @@
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-                <ColumnDefinition Width="300"></ColumnDefinition>
+                <ColumnDefinition Width="200"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
+                <ColumnDefinition Width="100"></ColumnDefinition>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition Width="Auto"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <Label Grid.Column="0"
@@ -38,7 +41,7 @@
                     VerticalAlignment="Center"
                     x:Name="ScaleSlider"></Slider>
             <Label x:Name="ZoomLabel"
-                   Width="150"
+                   Width="120"
                    Grid.Column="3"
                    FontSize="18"
                    VerticalContentAlignment="Center">
@@ -50,6 +53,33 @@
                     </TextBlock.Text>
                 </TextBlock>
             </Label>
+            <Slider Minimum="0.1"
+                    Maximum="1.0"
+                    Value="0.5"
+                    SmallChange="0.05"
+                    LargeChange="0.1"
+                    Grid.Column="4"
+                    VerticalAlignment="Center"
+                    x:Name="LineThicknessSlider"
+                    ValueChanged="LineThicknessSlider_OnValueChanged"></Slider>
+            <Label x:Name="LineThicknessLabel"
+                   Width="130"
+                   Grid.Column="5"
+                   FontSize="18"
+                   VerticalContentAlignment="Center">
+                <TextBlock>
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="Thickness: {0}">
+                            <Binding ElementName="LineThicknessSlider" Path="Value" StringFormat=" {0:0.##}"></Binding>
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+            </Label>
+            <Button Grid.Column="6"
+                    Content="Render Output"
+                    FontSize="18"
+                    x:Name="RenderOutputButton"
+                    Click="RenderOutputButton_OnClick"></Button>
         </Grid>
 
         <ScrollViewer HorizontalScrollBarVisibility="Auto"

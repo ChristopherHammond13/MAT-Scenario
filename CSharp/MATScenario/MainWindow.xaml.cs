@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,6 +27,13 @@ namespace MATScenario
         public MatParser Parser { get; }
         public static double DefaultScale => 10.0;
         public double CurrentScale { get; private set; } = DefaultScale;
+
+        public double LineThickness
+        {
+            get { return LineThicknessSlider.Value; }
+            set { LineThicknessSlider.Value = value; }
+        }
+
         public MatSolutionParser SolutionParser { get; }
 
         public MainWindow()
@@ -85,13 +93,33 @@ namespace MATScenario
                             },
                             Stroke = Brushes.DarkBlue,
                             Fill = Brushes.DarkBlue,
-                            StrokeThickness = 0.5,
+                            StrokeThickness = LineThickness,
                             HorizontalAlignment = HorizontalAlignment.Center,
                             VerticalAlignment = VerticalAlignment.Center
                         });
                     }
                 }
             }
+        }
+
+        private void RenderOutputButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            var rtb = new RenderTargetBitmap((int)MainWindowElement.ActualWidth, (int)MainWindowElement.ActualHeight, 96d, 96d, default(PixelFormat));
+            rtb.Render(GraphCanvas);
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(rtb));
+            using (var fs = File.OpenWrite("Render" + ((MatScenario)ScenarioComboBox.SelectedItem).Index + ".png"))
+            {
+                encoder.Save(fs);
+            }
+        }
+
+        private void LineThicknessSlider_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (!IsInitialized)
+                return;
+
+            RefreshCanvas((MatScenario) ScenarioComboBox.SelectedItem);
         }
     }
 }
