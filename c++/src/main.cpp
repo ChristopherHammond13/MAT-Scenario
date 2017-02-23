@@ -266,7 +266,7 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots) {
         simulation_running = false; 
         // Check if there is an asleep robot
         for (unsigned i=0; i<robots.N(); i++) {
-            if (awake.find(i) != awake.end()) {
+            if (awake.find(i) == awake.end()) {
                 simulation_running = true;
                 break;
             }
@@ -283,6 +283,13 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots) {
                     stopped.find(i) == stopped.end() &&
                     schedule.empty()) {
                 stopped.insert(i); 
+            }
+            // If robot not claimed and is awake then assign them
+            if (awake.find(i) != awake.end() &&
+                    claimed.find(i) == claimed.end() && 
+                    stopped.find(i) == stopped.end() &&
+                    schedule.size() > 0) {
+
             }
         }
     }
