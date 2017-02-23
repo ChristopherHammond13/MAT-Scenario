@@ -93,3 +93,6 @@ ENV/
 
 # Heathens
 .DS_Store
+
+# Swap and o
+*.swp 

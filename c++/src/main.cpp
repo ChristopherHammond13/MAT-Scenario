@@ -35,6 +35,10 @@ command line run
 #include <string>        //Gives string class
 #include <sstream>       //Gives string streams
 #include <vector>        //std vectors
+#include <map>
+#include <set>
+#include <deque>
+#include <utility>
 //#define NDEBUG           //Turns off assert.
 #include <cassert>
 
@@ -52,7 +56,13 @@ std::string magenta("\x1b[35m");
 std::string cyan("\E[36m");
 std::string white_bold("\E[1;37;40m");
 std::string clear_display("\E[2J");
-  
+    
+std::map<unsigned, VisiLibity::Point> awake;
+std::map<unsigned, VisiLibity::Point> claimed;
+std::map<unsigned, double> distance_to_travel;
+std::set<unsigned> stopped;
+
+void solve(VisiLibity::Environment, VisiLibity::Guards);
 
 //=========================Main=========================//
 int main(int argc, char *argv[])
@@ -134,14 +144,14 @@ int main(int argc, char *argv[])
 
 
   //Check Guards are all in the Environment
-  std::cout << "Checking all guards are "
+  std::cout << "Checking all robots are "
 	    << "in the environment and noncolocated . . . ";
   my_guards.snap_to_boundary_of(my_environment, epsilon);
   my_guards.snap_to_vertices_of(my_environment, epsilon);
   for(unsigned i=0; i<my_guards.N(); i++){
     if( !my_guards[i].in(my_environment, epsilon) ){
       std::cout << std::endl << red 
-		<< "Warning:  guard " << i 
+		<< "Warning:  robot " << i 
 		<< " not in the environment."
 		<< normal << std::endl;
       exit(1);
@@ -149,7 +159,7 @@ int main(int argc, char *argv[])
   }
   if( !my_guards.noncolocated(epsilon) ){
     std::cout << std::endl << red 
-	      << "Warning:  Some guards are colocated." 
+	      << "Warning:  Some robots are colocated." 
 	      <<  normal << std::endl;
     exit(1);
   }
@@ -160,7 +170,7 @@ int main(int argc, char *argv[])
 
   /*----------Print Data and Statistics to Screen----------*/
 
-
+    /*
   //Environment data
   std::cout << "The environment model is:" << std::endl;
   std::cout << magenta << my_environment << normal;
@@ -187,6 +197,7 @@ int main(int argc, char *argv[])
   //Guards stats
   std::cout << "There are " << cyan << my_guards.N() 
 	    << " guards." << normal << std::endl;
+  */
 
 
   /*----------Compute the Visibility Polygon 
@@ -194,6 +205,7 @@ int main(int argc, char *argv[])
  
  
   //Prompt user
+  /*
   int guard_choice(0);
   std::cout << "Which guard would you like "
 	    <<"to compute the visibility polygon of "
@@ -207,12 +219,77 @@ int main(int argc, char *argv[])
   std::cout << "The visibility polygon is" << std::endl
 	    << magenta << my_visibility_polygon << normal
 	    << std::endl;
-
-  /*
+  
   //To save the visibility polygon in an Environment file
   VisiLibity::Environment(my_visibility_polygon)
     .write_to_file("./example_visibility_polygon.cin", IOS_PRECISION);
   */
 
+    solve(my_environment, my_guards);
+
   return 0;
 }
+
+void solve(VisiLibity::Environment environment, VisiLibity::Guards robots) {
+    std::cout << "Starting..." << std::endl;
+
+    std::vector<VisiLibity::Polyline> solution;
+    // TODO Robot paths needed 
+    std::vector<std::pair<int, std::vector<VisiLibity::Point>>> robot_paths;
+
+    std::deque<VisiLibity::Point> schedule;
+    // Populate schedule
+    for(unsigned i=0; i<robots.N(); i++){
+        schedule.push_back(robots[i]);
+        std::cout << "Added " << cyan << "Robot " << i
+            << normal << " (" << robots[i] << ")"
+            << " to the schedule."  
+            << std::endl;
+    }
+
+    // Get the first robot from the schedule and pop it
+    VisiLibity::Point first_robot = schedule.front();
+    schedule.pop_front();
+
+    // TODO Generate visibility graph
+    // > add holes
+    // > setup environment
+    /*
+    if (environment.) {
+        
+    }
+    */
+
+    bool simulation_running = true;
+    // Perform simulation
+    while (simulation_running) {
+        simulation_running = false; 
+        // Check if there is an asleep robot
+        for (unsigned i=0; i<robots.N(); i++) {
+            if (awake.find(i) != awake.end()) {
+                simulation_running = true;
+                break;
+            }
+        }
+
+        unsigned next_robot_id = NULL;
+        double min_distance = 10000;
+
+        // Loop through robots
+        for (unsigned i=0; i<robots.N(); i++) {
+            // Stop robot if schedule empty
+            if (awake.find(i) != awake.end() &&
+                    claimed.find(i) == claimed.end() &&
+                    stopped.find(i) == stopped.end() &&
+                    schedule.empty()) {
+                stopped.insert(i); 
+            }
+        }
+    }
+    
+    // Loop through robot_paths to build the solution
+
+    // Format the solution and print to stdout
+    
+}
+
