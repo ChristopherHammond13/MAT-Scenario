@@ -128,7 +128,7 @@ namespace MATScenario
         private void GraphCanvas_OnMouseDown(object sender, MouseButtonEventArgs e)
         {
             var p = Mouse.GetPosition(GraphCanvas);
-            var text = new StringBuilder("Coordinates Under Mouse Click: ");
+            var text = new StringBuilder("Coordinates Under Mouse Click: (");
             text.Append(p.X.ToString(CultureInfo.InvariantCulture));
             text.Append(", ");
             text.Append(p.Y.ToString(CultureInfo.InvariantCulture));
