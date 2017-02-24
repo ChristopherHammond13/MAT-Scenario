@@ -36,6 +36,17 @@ class input_parser(parser):
             coord = coord.replace(")", "")
             self.robots.append((float(coord.split(",")[0]), float(coord.split(",")[1])))
 
+    def coords_are_clockwise(self, coords):
+        sum = 0
+        for i, coord in enumerate(coords):
+            next_coord = (0.0,0.0)
+            try:
+                next_coord = coords[i+1]
+            except Exception:
+                pass
+            sum += (next_coord[0] - coord[0])*(next_coord[1] + coord[1])
+        return sum > 0
+
     def parse_polygons(self, poly_str):
         polygons = poly_str.split(";")
         for poly_str in polygons:
@@ -46,6 +57,8 @@ class input_parser(parser):
                 coord = coord.replace("(", "")
                 coord = coord.replace(")", "")
                 poly.append((float(coord.split(",")[0]), float(coord.split(",")[1])))
+            if not self.coords_are_clockwise(poly):
+                poly.reverse()
             self.polygons.append(poly)
 
     def parse(self, input):
