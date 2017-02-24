@@ -86,10 +86,16 @@
         <ScrollViewer HorizontalScrollBarVisibility="Auto"
                           VerticalScrollBarVisibility="Auto"
                           x:Name="CanvasScrollViewer"
-                          Grid.Row="1">
+                          Grid.Row="1"
+                      Background="Transparent"
+                      MouseDown="GraphCanvas_OnMouseDown">
             <Grid Width="Auto"
-                  Height="Auto">
-                <Border>
+                  Height="Auto"
+                  MouseDown="GraphCanvas_OnMouseDown"
+                  Background="Transparent">
+                <Border x:Name="BorderOfCanvas"
+                        MouseDown="GraphCanvas_OnMouseDown"
+                        Background="Transparent">
                     <Canvas
                         x:Name="GraphCanvas"
                         HorizontalAlignment="Center"
@@ -97,7 +103,8 @@
                         Width="Auto"
                         Height="Auto"
                         RenderTransformOrigin="0.5, 0.5"
-                        MouseDown="GraphCanvas_OnMouseDown">
+                        MouseDown="GraphCanvas_OnMouseDown"
+                        Background="Transparent">
                         <Canvas.Resources>
                             <utils:FlipConverter x:Key="FlipConverter"></utils:FlipConverter>
                         </Canvas.Resources>
