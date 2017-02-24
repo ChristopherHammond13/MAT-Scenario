@@ -394,9 +394,9 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
         unsigned i;
         std::ostringstream stream;
         for (i=0; i<path.size()-1;i++) {
-            stream << "(" << std::setprecision(std::numeric_limits<double>::digits10) << path[i].x() << "," << path[i].y() << "),";
+            stream << std::setprecision(std::numeric_limits<double>::digits10) << "(" << path[i].x() << "," << path[i].y() << "),";
         }
-        stream << "(" << std::setprecision(std::numeric_limits<double>::digits10) << path[i].x() << "," << path[i].y() << ")";
+        stream << std::setprecision(std::numeric_limits<double>::digits10) << "(" << path[i].x() << "," << path[i].y() << ")";
         solution_string.append(stream.str());
         solution_string.push_back(';');
     }
