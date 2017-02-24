@@ -43,7 +43,7 @@ class input_parser(parser):
             try:
                 next_coord = coords[i+1]
             except Exception:
-                pass
+                next_coord = coords[0]
             sum += (next_coord[0] - coord[0])*(next_coord[1] + coord[1])
         return sum > 0
 
