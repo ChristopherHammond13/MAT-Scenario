@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -16,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MATScenario.Parser;
 using MATScenario.Scenario;
+using MATScenario.Utils;
 
 namespace MATScenario
 {
@@ -80,6 +82,7 @@ namespace MATScenario
                 var e = GraphCanvas.Children.Add(r.EllipseRepresentation);
                 Canvas.SetLeft(GraphCanvas.Children[e], r.MovementHistory.First().X);
                 Canvas.SetTop(GraphCanvas.Children[e], r.MovementHistory.First().Y);
+                var brush = RandomBrush.GetRandomBrush();
                 if (r.MovementHistory.Count > 1)
                 {
                     for (var i = 1; i < r.MovementHistory.Count; i++)
@@ -91,8 +94,8 @@ namespace MATScenario
                                 new Point(r.MovementHistory[i].X, r.MovementHistory[i].Y),
                                 new Point(r.MovementHistory[i - 1].X, r.MovementHistory[i - 1].Y)
                             },
-                            Stroke = Brushes.DarkBlue,
-                            Fill = Brushes.DarkBlue,
+                            Stroke = brush,
+                            Fill = brush,
                             StrokeThickness = LineThickness,
                             HorizontalAlignment = HorizontalAlignment.Center,
                             VerticalAlignment = VerticalAlignment.Center
@@ -120,6 +123,18 @@ namespace MATScenario
                 return;
 
             RefreshCanvas((MatScenario) ScenarioComboBox.SelectedItem);
+        }
+
+        private void GraphCanvas_OnMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            var p = Mouse.GetPosition(GraphCanvas);
+            var text = new StringBuilder("Coordinates Under Mouse Click: ");
+            text.Append(p.X.ToString(CultureInfo.InvariantCulture));
+            text.Append(", ");
+            text.Append(p.Y.ToString(CultureInfo.InvariantCulture));
+            text.Append(")");
+
+            CurrentCoordinatesLabel.Content = text.ToString();
         }
     }
 }

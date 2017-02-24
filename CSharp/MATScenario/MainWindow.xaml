@@ -13,6 +13,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
@@ -33,7 +34,7 @@
                       SelectionChanged="ScenarioComboBox_OnSelectionChanged"
                       FontSize="20"></ComboBox>
             <Slider Minimum="0.5"
-                    Maximum="40.0"
+                    Maximum="50.0"
                     Value="10.0"
                     SmallChange="0.5"
                     LargeChange="5.0"
@@ -95,7 +96,8 @@
                         VerticalAlignment="Center"
                         Width="Auto"
                         Height="Auto"
-                        RenderTransformOrigin="0.5, 0.5">
+                        RenderTransformOrigin="0.5, 0.5"
+                        MouseDown="GraphCanvas_OnMouseDown">
                         <Canvas.Resources>
                             <utils:FlipConverter x:Key="FlipConverter"></utils:FlipConverter>
                         </Canvas.Resources>
@@ -107,5 +109,9 @@
                 </Border>
             </Grid>
         </ScrollViewer>
+        <Label Grid.Row="2"
+               x:Name="CurrentCoordinatesLabel"
+               FontSize="20">
+        </Label>
     </Grid>
 </Window>

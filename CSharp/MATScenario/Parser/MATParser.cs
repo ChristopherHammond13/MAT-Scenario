@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -13,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using MATScenario.Annotations;
 using MATScenario.Scenario;
+using MATScenario.Utils;
 
 namespace MATScenario.Parser
 {
@@ -81,7 +83,7 @@ namespace MATScenario.Parser
                         {
                             Points = new PointCollection(),
                             Stroke = null,
-                            Fill = Brushes.Green,
+                            Fill = RandomBrush.GetRandomBrush(),
                             StrokeThickness = 0,
                             HorizontalAlignment = HorizontalAlignment.Center,
                             VerticalAlignment = VerticalAlignment.Center
@@ -98,5 +100,6 @@ namespace MATScenario.Parser
                 Scenarios.Add(scenario);
             }
         }
+        
     }
 }

@@ -61,7 +61,9 @@
     <Compile Include="Scenario\MatScenario.cs" />
     <Compile Include="Scenario\Robot.cs" />
     <Compile Include="Solution\MatSolution.cs" />
+    <Compile Include="Solver\ShortestPath.cs" />
     <Compile Include="Utils\FlipConverter.cs" />
+    <Compile Include="Utils\RandomBrush.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
