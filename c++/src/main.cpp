@@ -239,7 +239,7 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
 
     std::vector<VisiLibity::Polyline> solution;
     // Robot paths needed 
-    std::vector<std::pair<int, std::vector<VisiLibity::Point>>> robot_paths;
+    std::vector<std::pair<unsigned, std::vector<VisiLibity::Point>>> robot_paths;
 
     std::deque<VisiLibity::Point> schedule;
     // Populate schedule
@@ -259,6 +259,9 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
     schedule.pop_front();
     // Wake the first robot
     awake[0] = first_robot;
+    std::vector<VisiLibity::Point> init_path;
+    init_path.push_back(first_robot);
+    robot_paths.push_back(std::make_pair(0, init_path));
 
     bool simulation_running = true;
     // Perform simulation
@@ -270,6 +273,13 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
                 simulation_running = true;
                 break;
             }
+        }
+        if (!simulation_running) {
+            std::cout << "They woke: " << red_blink;
+            for (auto &woke : awake) {
+                std::cout << woke.first << " ";
+            }
+            std::cout << normal << std::endl;
         }
 
         double remaining_movement = 0.5;
@@ -285,10 +295,6 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
                         stopped.find(i) == stopped.end() &&
                         schedule.empty()) {
                     stopped.insert(i); 
-                    for (std::set<unsigned>::iterator iter=stopped.begin(); iter != stopped.end(); iter++) {
-                        std::cout << *iter << ", ";
-                    }
-                    std::cout << std::endl;
                 }
                 // If robot not claimed and is awake then assign them
                 if (awake.find(i) != awake.end() &&
@@ -356,6 +362,8 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
                 for (auto &robot_path : robot_paths) {
                     if (next_robot_id == robot_path.first) {
                         robot_path.second.push_back(claimed[next_robot_id]);
+                        std::cout << red_blink << "Pushing back" << std::endl;
+                        break;
                     }
                 }
 
@@ -368,11 +376,12 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
     // Loop through robot_paths to build the solution
     // using the shortest path around obstacles
     for (auto &robot_path : robot_paths) {
+        std::cout << "Path" << std::endl;
         if (robot_path.second.size() > 1) {
             std::vector<VisiLibity::Point> full_path;    
-            for (int i=0; i<robot_path.second.size()-1; i++) {
+            for (unsigned i=0; i<robot_path.second.size()-1; i++) {
                 VisiLibity::Polyline path = environment.shortest_path(robot_path.second[i], robot_path.second[i+1]);
-                for (int j=0; j<path.size(); j++) {
+                for (unsigned j=0; j<path.size(); j++) {
                     full_path.push_back(path[j]);
                 }
             }
@@ -382,7 +391,7 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
     // TODO Format the solution and print to stdout
     std::string solution_string = ""; 
     for (auto &path : solution) {
-        int i;
+        unsigned i;
         std::ostringstream stream;
         for (i=0; i<path.size()-1;i++) {
             stream << "(" << std::setprecision(std::numeric_limits<double>::digits10) << path[i].x() << "," << path[i].y() << "),";
@@ -391,6 +400,9 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
         solution_string.append(stream.str());
         solution_string.push_back(';');
     }
+    
+    solution_string.resize(solution_string.length()-1);
+
     std::cout << solution_string << std::endl;
 }
 
@@ -410,7 +422,6 @@ void move_bots(double distance) {
                 distance / distance_to_travel[robot_id];
             // Move
             awake[robot_id] = VisiLibity::Point(new_x, new_y);
-            std::cout << awake[robot_id].x() << "," << awake[robot_id].y() << std::endl;
             // Update dtt
             distance_to_travel[robot_id] -= distance;
         }
