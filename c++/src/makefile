@@ -3,11 +3,11 @@ current_target: main
 
 
 #Compiler flags
-#CXXFLAGS = -O0 -Wall -ggdb
-CXXFLAGS = -O2 -fPIC
+CXXFLAGS = -O0 -Wall -ggdb
+#CXXFLAGS = -O2 -fPIC
 #Linker flags
-#LDFLAGS = -O0 -Wall -ggdb
-LDFLAGS = -O2
+LDFLAGS = -O0 -Wall -ggdb
+#LDFLAGS = -O2
 
 
 #Modules

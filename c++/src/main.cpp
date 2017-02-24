@@ -63,6 +63,7 @@ std::map<unsigned, VisiLibity::Point> claimed;
 std::map<unsigned, double> distance_to_travel;
 std::set<unsigned> stopped;
 
+void solve(VisiLibity::Environment, VisiLibity::Guards, double epsilon);
 void solve(VisiLibity::Environment, VisiLibity::Guards, double);
 void move_bots(double distance);
 
@@ -249,6 +250,9 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
             << " to the schedule."  
             << std::endl;
     }
+
+    // TODO do we use this or does it work as is?
+    VisiLibity::Visibility_Graph vg(robots, environment, epsilon);
 
     // Get the first robot from the schedule and pop it
     VisiLibity::Point first_robot = schedule.front();
