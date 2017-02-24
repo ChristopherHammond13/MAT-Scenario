@@ -3556,9 +3556,9 @@ namespace VisiLibity
 				     const Environment& environment, 
 				     double epsilon)
   {
-    *this = Visibility_Graph( guards.positions_,
-			      environment, 
-			      epsilon );
+      new (this) Visibility_Graph(guards.positions_,
+			      environment,
+			      epsilon);
   }
   
   

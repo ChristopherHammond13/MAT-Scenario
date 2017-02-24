@@ -62,7 +62,7 @@ std::map<unsigned, VisiLibity::Point> claimed;
 std::map<unsigned, double> distance_to_travel;
 std::set<unsigned> stopped;
 
-void solve(VisiLibity::Environment, VisiLibity::Guards);
+void solve(VisiLibity::Environment, VisiLibity::Guards, double epsilon);
 void move_bots(double distance);
 
 //=========================Main=========================//
@@ -226,12 +226,12 @@ int main(int argc, char *argv[])
     .write_to_file("./example_visibility_polygon.cin", IOS_PRECISION);
   */
 
-    solve(my_environment, my_guards);
+    solve(my_environment, my_guards, epsilon);
 
   return 0;
 }
 
-void solve(VisiLibity::Environment environment, VisiLibity::Guards robots) {
+void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, double epsilon) {
     std::cout << "Starting..." << std::endl;
 
     std::vector<VisiLibity::Polyline> solution;
@@ -247,6 +247,8 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots) {
             << " to the schedule."  
             << std::endl;
     }
+
+    VisiLibity::Visibility_Graph vg(robots, environment, epsilon);
 
     // Get the first robot from the schedule and pop it
     VisiLibity::Point first_robot = schedule.front();
