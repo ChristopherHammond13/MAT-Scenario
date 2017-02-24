@@ -63,6 +63,7 @@ std::map<unsigned, double> distance_to_travel;
 std::set<unsigned> stopped;
 
 void solve(VisiLibity::Environment, VisiLibity::Guards);
+void move_bots(double distance);
 
 //=========================Main=========================//
 int main(int argc, char *argv[])
@@ -272,31 +273,112 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots) {
             }
         }
 
-        unsigned next_robot_id = NULL;
-        double min_distance = 10000;
+        double remaining_movement = 0.5;
+        while (remaining_movement > 0.0) {
+            unsigned next_robot_id = 666;
+            double min_distance = 10000;
 
-        // Loop through robots
-        for (unsigned i=0; i<robots.N(); i++) {
-            // Stop robot if schedule empty
-            if (awake.find(i) != awake.end() &&
-                    claimed.find(i) == claimed.end() &&
-                    stopped.find(i) == stopped.end() &&
-                    schedule.empty()) {
-                stopped.insert(i); 
+            // Loop through robots
+            for (unsigned i=0; i<robots.N(); i++) {
+                // Stop robot if schedule empty
+                if (awake.find(i) != awake.end() &&
+                        claimed.find(i) == claimed.end() &&
+                        stopped.find(i) == stopped.end() &&
+                        schedule.empty()) {
+                    stopped.insert(i); 
+                }
+                // If robot not claimed and is awake then assign them
+                if (awake.find(i) != awake.end() &&
+                        claimed.find(i) == claimed.end() && 
+                        stopped.find(i) == stopped.end() &&
+                        schedule.size() > 0) {
+                    // Get the next target robot from the schedule and pop it
+                    VisiLibity::Point next_target = schedule.front();
+                    schedule.pop_front();
+
+                    claimed[i] = next_target;
+                    float min_len;
+                    // TODO get min_len from shortest_path
+                    distance_to_travel[i] = min_len;
+                }
+                // If robot awake and not stopped then check if distance 
+                // to travel is less than min_distance
+                if (awake.find(i) != awake.end() &&
+                        stopped.find(i) == stopped.end()) {
+
+                    std::map<unsigned, double>::iterator dtt_iter = distance_to_travel.find(i);
+                    if (dtt_iter != distance_to_travel.end() &&
+                            dtt_iter->second < min_distance) {
+                        min_distance = dtt_iter->second;
+                        next_robot_id = i;
+                    }
+
+                }
             }
-            // If robot not claimed and is awake then assign them
-            if (awake.find(i) != awake.end() &&
-                    claimed.find(i) == claimed.end() && 
-                    stopped.find(i) == stopped.end() &&
-                    schedule.size() > 0) {
 
+            // If no robot is close enough to awaken then move them
+            if (min_distance <= remaining_movement) {
+                move_bots(remaining_movement);
+                remaining_movement = 0; // update remaining movement
+            }
+
+            // If a robot can awaken another then do so
+            if (next_robot_id != 666 &&
+                    min_distance <= remaining_movement) {
+                move_bots(min_distance); 
+                remaining_movement -= min_distance; // update remaining movement
+
+                std::map<unsigned, VisiLibity::Point>::iterator next_robot_iter;
+                next_robot_iter = claimed.find(next_robot_id);
+                // Get the wakeup target
+                VisiLibity::Point wakeup_target = next_robot_iter->second;
+                unsigned wakeup_id;
+                // Set the wakeup id by finding it in the robots
+                for (unsigned i=0; i<robots.N(); i++) {
+                    if (robots[i] == wakeup_target) {
+                        wakeup_id = i;
+                        break;
+                    }
+                }
+                // Wake target
+                awake[wakeup_id] = wakeup_target;
+
+                // Add point of woken up robot to the path for the 
+                // wakeup target
+
+                // Free up the waker
+                claimed.erase(next_robot_iter);
             }
         }
     }
     
-    // Loop through robot_paths to build the solution
+    // TODO Loop through robot_paths to build the solution
+    // using the shortest path around obstacles
 
-    // Format the solution and print to stdout
+    // TODO Format the solution and print to stdout
     
 }
 
+// Moves the bots by a given distance 
+void move_bots(double distance) {
+    std::map<unsigned, VisiLibity::Point>::iterator awake_iter;
+
+    for (auto &robot : awake) {
+        // If robot isn't in stopped then move iterator
+        unsigned robot_id = robot.first;
+        if (stopped.find(robot_id) == stopped.end()) {
+            // Get new x position
+            double new_x = awake[robot_id].x() + 
+                (claimed[robot_id].x() - awake[robot_id].x()) *
+                distance / distance_to_travel[robot_id];
+            // Get new y position
+            double new_y = awake[robot_id].y() + 
+                (claimed[robot_id].y() - awake[robot_id].y()) *
+                distance / distance_to_travel[robot_id];
+            // Move
+            awake[robot_id] = VisiLibity::Point(new_x, new_y);
+            // Update dtt
+            distance_to_travel[robot_id] -= distance;
+        }
+    }
+}
