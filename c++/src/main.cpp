@@ -33,6 +33,7 @@ command line run
 #include <iostream>      //std I/O
 #include <cstring>       //Gives C-string manipulation
 #include <string>        //Gives string class
+#include <iomanip>       // Precision setting!
 #include <sstream>       //Gives string streams
 #include <vector>        //std vectors
 #include <map>           //std map
@@ -236,7 +237,7 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
     std::cout << "Starting..." << std::endl;
 
     std::vector<VisiLibity::Polyline> solution;
-    // TODO Robot paths needed 
+    // Robot paths needed 
     std::vector<std::pair<int, std::vector<VisiLibity::Point>>> robot_paths;
 
     std::deque<VisiLibity::Point> schedule;
@@ -254,15 +255,6 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
     schedule.pop_front();
     // Wake the first robot
     awake[0] = first_robot;
-
-    // TODO Generate visibility graph
-    // > add holes
-    // > setup environment
-    /*
-    if (environment.) {
-        
-    }
-    */
 
     bool simulation_running = true;
     // Perform simulation
@@ -304,7 +296,7 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
                     schedule.pop_front();
 
                     claimed[i] = next_target;
-                    // TODO get min_len from shortest_path
+                    // get min_len from shortest_path
                     double min_len = environment.shortest_path(awake[i], next_target).length();
                      
                     distance_to_travel[i] = min_len;
@@ -353,6 +345,15 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
 
                 // Add point of woken up robot to the path for the 
                 // wakeup target
+                std::vector<VisiLibity::Point> new_path;
+                new_path.push_back(wakeup_target);
+                robot_paths.push_back(std::make_pair(wakeup_id, new_path));
+
+                for (auto &robot_path : robot_paths) {
+                    if (next_robot_id == robot_path.first) {
+                        robot_path.second.push_back(claimed[next_robot_id]);
+                    }
+                }
 
                 // Free up the waker
                 claimed.erase(next_robot_iter);
@@ -360,16 +361,37 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
         }
     }
     
-    // TODO Loop through robot_paths to build the solution
+    // Loop through robot_paths to build the solution
     // using the shortest path around obstacles
-
+    for (auto &robot_path : robot_paths) {
+        if (robot_path.second.size() > 1) {
+            std::vector<VisiLibity::Point> full_path;    
+            for (int i=0; i<robot_path.second.size()-1; i++) {
+                VisiLibity::Polyline path = environment.shortest_path(robot_path.second[i], robot_path.second[i+1]);
+                for (int j=0; j<path.size(); j++) {
+                    full_path.push_back(path[j]);
+                }
+            }
+            solution.push_back(full_path);
+        }
+    }
     // TODO Format the solution and print to stdout
-    
+    std::string solution_string = ""; 
+    for (auto &path : solution) {
+        int i;
+        std::ostringstream stream;
+        for (i=0; i<path.size()-1;i++) {
+            stream << "(" << std::setprecision(std::numeric_limits<double>::digits10) << path[i].x() << "," << path[i].y() << "),";
+        }
+        stream << "(" << std::setprecision(std::numeric_limits<double>::digits10) << path[i].x() << "," << path[i].y() << ")";
+        solution_string.append(stream.str());
+        solution_string.push_back(';');
+    }
+    std::cout << solution_string << std::endl;
 }
 
 // Moves the bots by a given distance 
 void move_bots(double distance) {
-    std::map<unsigned, VisiLibity::Point>::iterator awake_iter;
     for (auto &robot : awake) {
         // If robot isn't in stopped then move iterator
         unsigned robot_id = robot.first;
