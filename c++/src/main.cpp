@@ -35,10 +35,10 @@ command line run
 #include <string>        //Gives string class
 #include <sstream>       //Gives string streams
 #include <vector>        //std vectors
-#include <map>
-#include <set>
-#include <deque>
-#include <utility>
+#include <map>           //std map
+#include <set>           //std set
+#include <deque>         //std deque
+#include <utility>       //utility for std pair
 //#define NDEBUG           //Turns off assert.
 #include <cassert>
 
@@ -63,6 +63,7 @@ std::map<unsigned, double> distance_to_travel;
 std::set<unsigned> stopped;
 
 void solve(VisiLibity::Environment, VisiLibity::Guards, double epsilon);
+void solve(VisiLibity::Environment, VisiLibity::Guards, double);
 void move_bots(double distance);
 
 //=========================Main=========================//
@@ -92,6 +93,7 @@ int main(int argc, char *argv[])
   //:WARNING: 
   //may need to modify epsilon for Environments with greatly varying
   //scale of features
+  // Ilya Constant
   double epsilon = 0.000000001;
   std::cout << green << "The robustness constant epsilon is set to "
 	    << epsilon << normal << std::endl;
@@ -107,7 +109,7 @@ int main(int argc, char *argv[])
   std::cout << environment_file << " . . . ";
   //Construct Environment object from file
   VisiLibity::Environment my_environment(environment_file);
-  std::cout << "OK" << std::endl;
+  std::cout << green << "OK" << normal << std::endl;
 
 
   //Load guard positions from file
@@ -117,7 +119,7 @@ int main(int argc, char *argv[])
   std::cout << guards_file << " . . . ";
   //Construct Guards object from file
   VisiLibity::Guards my_guards(guards_file);
-  std::cout << "OK" << std::endl;
+  std::cout << green << "OK" << normal << std::endl;
 
 
   /*----------Check Validity of Geometry----------*/
@@ -126,7 +128,7 @@ int main(int argc, char *argv[])
   //Check Environment is epsilon-valid
   std::cout << "Validating environment model . . . ";
   if(  my_environment.is_valid( epsilon )  )
-    std::cout << "OK" << std::endl;
+    std::cout << green << "OK" << normal << std::endl;
   else{
     std::cout << std::endl << red << "Warning:  Environment model "
 	      << "is invalid." << std::endl
@@ -165,7 +167,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
   else
-    std::cout << "OK" << std::endl;
+    std::cout << green << "OK" << normal << std::endl;
 
 
 
@@ -253,6 +255,8 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
     // Get the first robot from the schedule and pop it
     VisiLibity::Point first_robot = schedule.front();
     schedule.pop_front();
+    // Wake the first robot
+    awake[0] = first_robot;
 
     // TODO Generate visibility graph
     // > add holes
@@ -276,7 +280,7 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
         }
 
         double remaining_movement = 0.5;
-        while (remaining_movement > 0.0) {
+        while (remaining_movement > 0) {
             unsigned next_robot_id = 666;
             double min_distance = 10000;
 
@@ -288,6 +292,10 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
                         stopped.find(i) == stopped.end() &&
                         schedule.empty()) {
                     stopped.insert(i); 
+                    for (std::set<unsigned>::iterator iter=stopped.begin(); iter != stopped.end(); iter++) {
+                        std::cout << *iter << ", ";
+                    }
+                    std::cout << std::endl;
                 }
                 // If robot not claimed and is awake then assign them
                 if (awake.find(i) != awake.end() &&
@@ -299,8 +307,9 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
                     schedule.pop_front();
 
                     claimed[i] = next_target;
-                    float min_len;
                     // TODO get min_len from shortest_path
+                    double min_len = environment.shortest_path(awake[i], next_target).length();
+                     
                     distance_to_travel[i] = min_len;
                 }
                 // If robot awake and not stopped then check if distance 
@@ -319,7 +328,7 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
             }
 
             // If no robot is close enough to awaken then move them
-            if (min_distance <= remaining_movement) {
+            if (min_distance > remaining_movement) {
                 move_bots(remaining_movement);
                 remaining_movement = 0; // update remaining movement
             }
@@ -364,7 +373,6 @@ void solve(VisiLibity::Environment environment, VisiLibity::Guards robots, doubl
 // Moves the bots by a given distance 
 void move_bots(double distance) {
     std::map<unsigned, VisiLibity::Point>::iterator awake_iter;
-
     for (auto &robot : awake) {
         // If robot isn't in stopped then move iterator
         unsigned robot_id = robot.first;
@@ -379,6 +387,7 @@ void move_bots(double distance) {
                 distance / distance_to_travel[robot_id];
             // Move
             awake[robot_id] = VisiLibity::Point(new_x, new_y);
+            std::cout << awake[robot_id].x() << "," << awake[robot_id].y() << std::endl;
             // Update dtt
             distance_to_travel[robot_id] -= distance;
         }
